@@ -1,0 +1,13 @@
+{"ts": "2026-11-07T18:24:38Z", "tipo": "sesion.reanudar", "actor": "agente", "sujeto": "OBJ-01", "de": null, "a": "hipotesis", "detalle": {"accion": "iniciar", "idea": "Agente educativo disruptivo: una infraestructura de recuperación de conocimiento tipo HippoRAG 2 que recupera correctame"}}
+{"ts": "2026-11-07T18:24:38Z", "tipo": "tarea.transicion", "actor": "agente", "sujeto": "TASK-01", "de": "pendiente", "a": "preparada", "detalle": {}}
+{"ts": "2026-11-07T18:24:38Z", "tipo": "tarea.transicion", "actor": "agente", "sujeto": "TASK-01", "de": "preparada", "a": "en_curso", "detalle": {}}
+{"ts": "2026-11-07T21:25:07Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-01", "de": null, "a": null, "detalle": {"enlaza": "ASK-01", "pendiente": false}}
+{"ts": "2026-11-07T21:25:08Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-02", "de": null, "a": null, "detalle": {"enlaza": "ASK-02", "pendiente": false}}
+{"ts": "2026-11-07T21:25:08Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-03", "de": null, "a": null, "detalle": {"enlaza": "ASK-02", "pendiente": true}}
+{"ts": "2026-11-07T21:25:08Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-04", "de": null, "a": null, "detalle": {"enlaza": "ASK-03", "pendiente": true}}
+{"ts": "2026-11-07T21:25:08Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-05", "de": null, "a": null, "detalle": {"enlaza": "ASK-04", "pendiente": true}}
+{"ts": "2026-11-07T21:25:08Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-06", "de": null, "a": null, "detalle": {"enlaza": "ASK-05", "pendiente": true}}
+{"ts": "2026-11-07T21:25:09Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-07", "de": null, "a": null, "detalle": {"enlaza": "ASK-06", "pendiente": true}}
+{"ts": "2026-11-07T21:25:09Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-08", "de": null, "a": null, "detalle": {"enlaza": "ASK-08", "pendiente": true}}
+{"ts": "2026-11-07T21:25:09Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-09", "de": null, "a": null, "detalle": {"enlaza": "ASK-09", "pendiente": true}}
+{"ts": "2026-11-07T21:25:09Z", "tipo": "nota.anadir", "actor": "usuario", "sujeto": "NOTE-10", "de": null, "a": null, "detalle": {"enlaza": "ASK-07", "pendiente": true}}

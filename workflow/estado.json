@@ -1,0 +1,41 @@
+{
+  "contrato_version": "0.1.0",
+  "paquete_version": "0.1.0-rc1",
+  "actualizado": "2026-11-07T18:24:38Z",
+  "actividad": {
+    "id": "descubrir",
+    "nombre": "Descubrir (idea → preguntas)",
+    "estado": "en_curso"
+  },
+  "tareas": {
+    "TASK-01": {
+      "id": "TASK-01",
+      "titulo": "Cerrar descubrimiento mínimo",
+      "estado": "en_curso",
+      "depende_de": [],
+      "enlaces": [
+        "OBJ-01"
+      ],
+      "evidencia": [],
+      "comprobacion": null,
+      "bloqueo": null,
+      "descubrimiento": true
+    }
+  },
+  "bloqueos": [],
+  "siguiente_preparada": null,
+  "idea_inicial": "Agente educativo disruptivo: una infraestructura de recuperación de conocimiento tipo HippoRAG 2 que recupera correctame",
+  "entrega_actual": "E01",
+  "modo_descubrimiento": "completo",
+  "asks_activas": [
+    "ASK-01",
+    "ASK-02",
+    "ASK-03",
+    "ASK-04",
+    "ASK-05",
+    "ASK-06",
+    "ASK-07",
+    "ASK-08",
+    "ASK-09"
+  ]
+}

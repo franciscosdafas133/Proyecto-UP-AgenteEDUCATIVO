@@ -1,0 +1,75 @@
+{
+  "contrato_version": "0.1.0",
+  "items": {
+    "NOTE-01": {
+      "id": "NOTE-01",
+      "texto": "Usuarios: solo alumnos. En la etapa inicial el equipo del proyecto construye y cura el corpus (no hay rol docente en el producto).",
+      "enlaza": "ASK-01",
+      "ts": "2026-11-07T21:25:07Z",
+      "pendiente": false
+    },
+    "NOTE-02": {
+      "id": "NOTE-02",
+      "texto": "Datos: preparación del corpus es etapa previa y externa a HippoRAG 2. Fuentes heterogéneas (diapositivas, sílabos, apuntes, separatas, guías de práctica/laboratorio, ejercicios resueltos, libros con derechos, transcripciones/aula virtual) → homogeneizar a pasajes texto plano UTF-8 (title/text/idx) en 4 pasos: extracción, limpieza, segmentación, metadatos de procedencia. Reglas de pasaje: autocontenido, 100–300 palabras, un tema, prosa completa (viñetas→oraciones, tablas→texto/markdown, fórmulas→LaTeX+explicación, imágenes→descripción), terminología consistente y siglas desarrolladas, sin encabezados/pies/OCR, sin relleno (índices, bibliografía), sin solapamiento excesivo ni duplicados. Metadatos (curso, unidad, archivo, página) en estructura externa para citar. Idioma: español con términos técnicos en inglés → embeddings multilingües, prompts OpenIE/filtro/QA en español, recalibrar umbral de sinonimia, preservar tildes y ñ, LLM bueno en español; modelos fijados antes de indexar. Set de evaluación propio en español.",
+      "enlaza": "ASK-02",
+      "ts": "2026-11-07T21:25:08Z",
+      "pendiente": false
+    },
+    "NOTE-03": {
+      "id": "NOTE-03",
+      "texto": "Pendiente de completar por el usuario: nombre del curso o cursos, universidad, si se incluyen libros de texto (derechos de uso) y transcripciones/aula virtual, tamaño estimado del corpus (borrador: 50–150 documentos, 2 000–20 000 pasajes).",
+      "enlaza": "ASK-02",
+      "ts": "2026-11-07T21:25:08Z",
+      "pendiente": true
+    },
+    "NOTE-04": {
+      "id": "NOTE-04",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-03",
+      "ts": "2026-11-07T21:25:08Z",
+      "pendiente": true
+    },
+    "NOTE-05": {
+      "id": "NOTE-05",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-04",
+      "ts": "2026-11-07T21:25:08Z",
+      "pendiente": true
+    },
+    "NOTE-06": {
+      "id": "NOTE-06",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-05",
+      "ts": "2026-11-07T21:25:08Z",
+      "pendiente": true
+    },
+    "NOTE-07": {
+      "id": "NOTE-07",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-06",
+      "ts": "2026-11-07T21:25:09Z",
+      "pendiente": true
+    },
+    "NOTE-08": {
+      "id": "NOTE-08",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-08",
+      "ts": "2026-11-07T21:25:09Z",
+      "pendiente": true
+    },
+    "NOTE-09": {
+      "id": "NOTE-09",
+      "texto": "Aplazada por el usuario (2026-11-07): se pregunta cuando el recuperador esté construido.",
+      "enlaza": "ASK-09",
+      "ts": "2026-11-07T21:25:09Z",
+      "pendiente": true
+    },
+    "NOTE-10": {
+      "id": "NOTE-10",
+      "texto": "Aplazada por el usuario hasta tener el recuperador. Ya se sabe: habrá un conjunto de preguntas de evaluación en español propio (no existen benchmarks equivalentes). Falta: métrica y umbral de aceptación.",
+      "enlaza": "ASK-07",
+      "ts": "2026-11-07T21:25:09Z",
+      "pendiente": true
+    }
+  }
+}

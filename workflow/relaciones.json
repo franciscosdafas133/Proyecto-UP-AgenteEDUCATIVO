@@ -1,0 +1,237 @@
+{
+  "contrato_version": "0.1.0",
+  "nodos": {
+    "OBJ-01": {
+      "tipo": "OBJ",
+      "estado_afirmacion": "hipotesis",
+      "archivo": "producto.md"
+    },
+    "TASK-01": {
+      "tipo": "TASK",
+      "archivo": "entregas/E01/tareas.md"
+    },
+    "ASK-01": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Quién lo usa"
+    },
+    "ASK-02": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Datos"
+    },
+    "ASK-03": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Otras apps y claves"
+    },
+    "ASK-04": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Cosas que tardan"
+    },
+    "ASK-05": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Choques"
+    },
+    "ASK-06": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Camino feliz"
+    },
+    "ASK-07": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Cómo sabemos que está bien"
+    },
+    "ASK-08": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Dónde se usa"
+    },
+    "ASK-09": {
+      "tipo": "ASK",
+      "archivo": "descubrimiento.md",
+      "area": "Después de publicar"
+    },
+    "NOTE-01": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-02": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-03": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-04": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-05": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-06": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-07": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-08": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-09": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "NOTE-10": {
+      "tipo": "NOTE",
+      "archivo": "apuntes.json"
+    },
+    "REQ-01": {
+      "tipo": "REQ",
+      "archivo": "producto.md"
+    },
+    "REQ-02": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-03": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-04": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-05": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-06": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-07": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-08": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    },
+    "REQ-09": {
+      "tipo": "REQ",
+      "archivo": "arquitectura/requisitos.md"
+    }
+  },
+  "aristas": [
+    {
+      "de": "TASK-01",
+      "tipo": "implementa",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-01",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-02",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-03",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-04",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-05",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-06",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-07",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-08",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "ASK-09",
+      "tipo": "comenta",
+      "a": "OBJ-01"
+    },
+    {
+      "de": "NOTE-01",
+      "tipo": "comenta",
+      "a": "ASK-01"
+    },
+    {
+      "de": "NOTE-02",
+      "tipo": "comenta",
+      "a": "ASK-02"
+    },
+    {
+      "de": "NOTE-03",
+      "tipo": "comenta",
+      "a": "ASK-02"
+    },
+    {
+      "de": "NOTE-04",
+      "tipo": "comenta",
+      "a": "ASK-03"
+    },
+    {
+      "de": "NOTE-05",
+      "tipo": "comenta",
+      "a": "ASK-04"
+    },
+    {
+      "de": "NOTE-06",
+      "tipo": "comenta",
+      "a": "ASK-05"
+    },
+    {
+      "de": "NOTE-07",
+      "tipo": "comenta",
+      "a": "ASK-06"
+    },
+    {
+      "de": "NOTE-08",
+      "tipo": "comenta",
+      "a": "ASK-08"
+    },
+    {
+      "de": "NOTE-09",
+      "tipo": "comenta",
+      "a": "ASK-09"
+    },
+    {
+      "de": "NOTE-10",
+      "tipo": "comenta",
+      "a": "ASK-07"
+    }
+  ]
+}
