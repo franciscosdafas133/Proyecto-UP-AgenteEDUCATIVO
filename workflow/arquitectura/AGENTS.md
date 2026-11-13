@@ -49,10 +49,15 @@ cronograma.md   ── plan de 7 días: qué se hace cada día y su puerta de sa
 | ¿Qué valor tiene un hiperparámetro? | `producto.md` → Hiperparámetros del paper |
 | ¿Qué archivo del repo implementa el paso Y? | `antecedentes.md` §1 |
 | ¿Qué hay que modificar para el español? | `antecedentes.md` §2 |
+| ¿Qué entrega la adaptación al español y qué falta aprobar? | `cambios-de-adaptacion.md` |
 | ¿Cómo se prepara y entra el material? | `antecedentes.md` §3 y `requisitos.md` (REQ-02, REQ-03) |
 | ¿Qué debe cumplir el recuperador? | `requisitos.md` |
 | ¿Cómo funciona el método, paso a paso? | `sistema.md` |
-| ¿Cuál es el flujo completo, en orden, para una persona o para un LLM? | `hipporag2-proceso.json` (canónico), `hipporag2-proceso.mmd` y la imagen `hipporag2-proceso.png` |
+| ¿Cuál es el flujo del paper, en orden? | `../flujo-de-trabajo/hipporag2-proceso.json`, `.mmd` y `.png` |
+| ¿Cómo corre el código, parte por parte, y qué está en inglés? | `../flujo-de-trabajo/hipporag2-flujo.png` y `.mmd` |
+| ¿Qué texto de ese flujo se puede pasar al español sin cambiar el método? | `../flujo-de-trabajo/hipporag2-espanol.md` |
+| ¿Cuál es la frase exacta de una herramienta en inglés? | `../flujo-de-trabajo/hipporag2-herramientas.json` |
+| ¿Qué función implementa cada paso? | `../flujo-de-trabajo/hipporag2-codigo.json` |
 | ¿Cómo se rastrea un resultado hasta su fuente? | `sistema.md` → Trazabilidad |
 | ¿Dónde puede aparecer una alucinación? | `sistema.md` → Dónde puede aparecer una alucinación |
 | ¿Cómo sé que un requisito se cumple? | `verificacion.md` |

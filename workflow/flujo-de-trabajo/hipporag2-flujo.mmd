@@ -1,0 +1,62 @@
+flowchart TD
+    classDef ingles fill:#e8f1fb,stroke:#1d4e89
+    classDef traza fill:#e8f5ec,stroke:#166534
+    classDef grafo fill:#f3eef8,stroke:#581c87
+    classDef desvio fill:#fffbeb,stroke:#92400e
+
+    A["A. Del documento al grafo<br/>index(docs)"] --> N1
+    N1["1 Documentos<br/>HippoRAG.index. String o Chunk. openie_mode online."] --> N2
+    N2["2 Un chunk<br/>TextPreprocessor. Un documento entra entero. Sin idioma."] --> N3
+    N3["3 Identidad y traza del pasaje<br/>insert_strings antes del LLM. Id hash chunk-. source_id y metadata aparte."] --> Q1
+
+    Q1{"¿OpenIE ya guardado?<br/>load_existing_openie"}
+    Q1 -->|no| N4
+    Q1 -->|sí, salta el LLM| N7
+    N4["4 NER · inglés<br/>OpenIE.ner · ner.py. Lote de todos los chunks nuevos, 8 hilos.<br/>No traducir named_entities ni ${passage}. Si falla, index se detiene."] --> N5
+    N5["5 Triples · inglés<br/>triple_extraction.py. Segundo lote, con las entidades del NER.<br/>No traducir triples, {passage} ni {named_entity_json}. Exactamente 3 elementos. Si falla, index se detiene."] --> N6
+    N6["6 La extracción queda atada al chunk<br/>merge_openie_results. Si no coinciden los conteos, index se detiene."] --> N7
+    N7["7 Normalizar<br/>text_processing. casefold, conserva ñ y tildes. Solo los triples, no el pasaje."] --> N8
+    N8["8 Embeddings de entidades y de hechos<br/>NV-Embed-v2. Sin frase de instrucción. El pasaje ya se embebió en el paso 3."] --> N9
+    N9["9 Aristas de hecho<br/>add_fact_edges. No dirigido. Peso suma 1. fact_source_counts anota el chunk."] --> N10
+    N10["10 Aristas de pasaje<br/>add_passage_edges. Peso 1. edge_kind = passage. No hay etiqueta contains."] --> Q2
+
+    Q2{"¿Entró un chunk nuevo?"}
+    Q2 -->|sí| N11
+    Q2 -->|no| SKIP["No reescribe el grafo<br/>No corre sinonimia, augment_graph ni save_igraph."]
+    N11["11 Sinonimia<br/>KNN k=2047, umbral 0,8, máximo 100. Sin idioma."] --> N12
+    N12["12 Grafo en disco<br/>augment_graph y save_igraph. graph.pickle."] --> B
+
+    B["B. De la pregunta a la respuesta<br/>rag_qa. El grafo no se modifica."] --> N13
+    N13["13 Entrada de la consulta<br/>Si ya es QuerySolution, salta al paso 24."] --> N14
+    N14["14 Cargar el índice<br/>prepare_retrieval_objects. Una vez por lote."] --> N15
+    N15["15 Dos embeddings de la pregunta · inglés<br/>linking.py. query_to_fact y query_to_passage.<br/>No traducir las claves ni Instruct: / Query:. Una vez, antes del bucle."] --> LOOP
+
+    LOOP["Bucle de retrieve<br/>for query in queries"] --> N16
+    N16["16 Puntaje de cada hecho<br/>get_fact_scores. Producto punto y min_max_normalize."] --> N17
+    N17["17 Cinco hechos candidatos<br/>rerank_facts. linking_top_k = 5."] --> N18
+    N18["18 Filtro · inglés<br/>filter_default_prompt.py. Hasta 4 hechos, sin inventar. 512 tokens.<br/>No traducir los marcadores [[ ## ... ## ]]."] --> N19
+    N19["19 Volver a un hecho real<br/>difflib, cutoff 0.0. No es un prompt."] --> Q3
+
+    Q3{"¿Quedó algún hecho?"}
+    Q3 -->|sí| N20
+    Q3 -->|no| N20b["20b Solo embeddings<br/>dense_passage_retrieval. Sin PageRank."]
+    N20["20 Peso de las frases<br/>Divide el puntaje entre los chunks de la entidad y promedia. Deja 5."] --> N21
+    N21["21 Peso de todos los pasajes<br/>Similitud normalizada por 0,05. Entran todos."] --> N22
+    N22["22 PageRank<br/>directed = False, damping 0,5. Si los pesos suman 0, retrieve se detiene."] --> N23
+    N20b --> N23
+    N23["23 Hasta 200 pasajes, con su traza<br/>retrieval_top_k = 200. Texto, puntaje, metadata y hechos semilla."] --> Q4
+
+    Q4{"¿Queda otra pregunta?"}
+    Q4 -->|sí, vuelve| N16
+    Q4 -->|no| N24
+    N24["24 Cinco pasajes para leer<br/>qa_top_k = 5. No lee los 200."] --> N25
+    N25["25 Lectura · inglés<br/>rag_qa_musique.py. El código escribe Wikipedia Title:, Question: y Thought:.<br/>No traducir Answer: sin cambiar el split."] --> N26
+    N26["26 Respuesta<br/>split Answer:. El índice no cambia. rag_qa no vuelve a buscar."]
+
+    IRCOT["No es este camino<br/>IRCoT vuelve a buscar solo si max_qa_steps es mayor que 1. El defecto es 1."]
+    N26 -.-> IRCOT
+
+    class N4,N5,N15,N18,N25 ingles
+    class N3,N6,N9,N10,N12,N23 traza
+    class N8,N11,N20,N21,N22 grafo
+    class SKIP,N20b,IRCOT desvio

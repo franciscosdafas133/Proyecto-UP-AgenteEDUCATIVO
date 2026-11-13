@@ -1,0 +1,149 @@
+{
+  "esquema": "hipporag2-herramientas/1",
+  "titulo": "Herramientas del código que están en inglés",
+  "para_que_sirve": "Las frases exactas de las cajas azules de hipporag2-flujo.png. Traducir una frase no cambia el algoritmo.",
+  "fuente": {
+    "repositorio": "https://github.com/OSU-NLP-Group/HippoRAG",
+    "commit": "d5c8329422e0a0b834a15874545cb6a74b4f9b26",
+    "commit_corto": "d5c8329",
+    "camino": "openie_mode online, embedding nvidia/NV-Embed-v2, rag_qa"
+  },
+  "instrucciones_para_llm": [
+    "Hay cinco herramientas con texto en inglés en el camino que corre.",
+    "traducir = se puede cambiar el idioma del texto.",
+    "no_traducir = si se cambia, el código deja de leer la respuesta o el embedding.",
+    "Las demás partes del flujo (grafo, PageRank, KNN, hash, text_processing) no tienen idioma."
+  ],
+  "herramientas": [
+    {
+      "id": "ner",
+      "nombre": "NER",
+      "orden_en_el_flujo": "index, paso 4",
+      "cuando": "Una vez por pasaje nuevo, antes de los triples.",
+      "funcion": "OpenIE.ner",
+      "archivo": "src/hipporag/prompts/templates/ner.py",
+      "quien_la_llama": "src/hipporag/information_extraction/openie_openai.py",
+      "modelo": "El LLM de extracción. Tope de salida: 2048 tokens.",
+      "idioma": "ingles",
+      "traducir": [
+        "Your task is to extract named entities from the given paragraph.",
+        "Respond with a JSON list of entities.",
+        "El ejemplo completo: el párrafo de Radio City y la lista de entidades de ese párrafo."
+      ],
+      "no_traducir": [
+        "La clave JSON named_entities. El parser la busca por ese nombre.",
+        "El hueco ${passage}, donde el código mete el pasaje."
+      ],
+      "estructura": ["system", "user con el ejemplo", "assistant con el JSON del ejemplo", "user con ${passage}"]
+    },
+    {
+      "id": "openie",
+      "nombre": "Extracción de triples",
+      "orden_en_el_flujo": "index, paso 5",
+      "cuando": "Justo después del NER, con las entidades que ese paso devolvió.",
+      "funcion": "OpenIE.triple_extraction",
+      "archivo": "src/hipporag/prompts/templates/triple_extraction.py",
+      "quien_la_llama": "src/hipporag/information_extraction/openie_openai.py",
+      "modelo": "El mismo LLM de extracción. Tope de salida: 4096 tokens.",
+      "idioma": "ingles",
+      "traducir": [
+        "Your task is to construct an RDF (Resource Description Framework) graph from the given passages and named entity lists.",
+        "Respond with a JSON list of triples, with each triple representing a relationship in the RDF graph.",
+        "Each triple should contain at least one, but preferably two, of the named entities in the list for each passage.",
+        "Clearly resolve pronouns to their specific names to maintain clarity.",
+        "Convert the paragraph into a JSON dict, it has a named entity list and a triple list.",
+        "El ejemplo es el mismo párrafo de Radio City, ya convertido en triples."
+      ],
+      "no_traducir": [
+        "La clave JSON triples. El parser la busca por ese nombre.",
+        "Los huecos {passage} y {named_entity_json}."
+      ],
+      "estructura": ["system", "user con pasaje de ejemplo y su lista de entidades", "assistant con los triples de ejemplo", "user con el pasaje real"]
+    },
+    {
+      "id": "filtro",
+      "nombre": "Filtro de hechos",
+      "orden_en_el_flujo": "rag_qa, paso 4",
+      "cuando": "En cada consulta, después de elegir los 5 hechos más parecidos.",
+      "funcion": "DSPyFilter.rerank",
+      "archivo": "src/hipporag/prompts/filter_default_prompt.py",
+      "quien_la_llama": "src/hipporag/rerank.py",
+      "modelo": "El LLM de extracción. Tope de salida: 512 tokens. rerank_dspy_file_path es null, así que este archivo es el que corre. El JSON filter_llama3.3-70B-Instruct.json no se carga salvo que se configure la ruta.",
+      "idioma": "ingles",
+      "traducir": [
+        "La instrucción: You are a critical component of a high-stakes question-answering system… select up to 4 relevant facts… do not generate new facts.",
+        "Los ejemplos: pregunta y hechos en inglés (Imperial River, The Ancestor, y los demás del archivo)."
+      ],
+      "no_traducir": [
+        "[[ ## question ## ]]",
+        "[[ ## fact_before_filter ## ]]",
+        "[[ ## fact_after_filter ## ]]",
+        "[[ ## completed ## ]]",
+        "El esquema del campo fact: lista de listas de tres strings. rerank.py parte la respuesta con la expresión [[ ## (palabra) ## ]]."
+      ],
+      "despues_del_llm": "difflib empareja cada hecho generado con el candidato más cercano. Eso no es texto en inglés: es el paso que obliga a devolver un hecho que ya existía."
+    },
+    {
+      "id": "embeddings",
+      "nombre": "Instrucciones del encoder",
+      "orden_en_el_flujo": "rag_qa, paso 2",
+      "cuando": "Al codificar la pregunta, no al indexar los pasajes ni los hechos.",
+      "funcion": "get_query_instruction",
+      "archivo": "src/hipporag/prompts/linking.py",
+      "quien_la_llama": "HippoRAG.get_query_embeddings, get_fact_scores y dense_passage_retrieval",
+      "modelo": "nvidia/NV-Embed-v2. En NVEmbedV2.py el modo es distinct y el prefijo es Instruct: {instrucción}\\nQuery:",
+      "idioma": "ingles",
+      "se_usan_en_el_camino": [
+        {"clave": "query_to_fact", "texto": "Given a question, retrieve relevant triplet facts that matches this question."},
+        {"clave": "query_to_passage", "texto": "Given a question, retrieve relevant documents that best answer the question."}
+      ],
+      "existen_y_no_se_llaman": [
+        {"clave": "ner_to_node", "texto": "Given a phrase, retrieve synonymous or relevant phrases that best match this phrase."},
+        {"clave": "query_to_node", "texto": "Given a question, retrieve relevant phrases that are mentioned in this question."},
+        {"clave": "query_to_sentence", "texto": "Given a question, retrieve relevant sentences that best answer the question."}
+      ],
+      "no_traducir": [
+        "Las claves query_to_fact y query_to_passage. El código las pide por ese nombre.",
+        "El molde Instruct: y Query: de NVEmbedV2.py. Es el formato que espera ese modelo."
+      ],
+      "si_el_modelo_cambia": "Un embedding cuyo nombre empieza por Transformers/ ignora estas frases. OpenAI embeddings también las ignora y avisa. Con NV-Embed-v2 sí entran."
+    },
+    {
+      "id": "lectura",
+      "nombre": "Lectura de la respuesta",
+      "orden_en_el_flujo": "rag_qa, paso 10",
+      "cuando": "Al final, con los 5 pasajes de qa_top_k. retrieve antes devolvió hasta 200.",
+      "funcion": "HippoRAG.qa",
+      "archivos": [
+        "src/hipporag/HippoRAG.py",
+        "src/hipporag/prompts/templates/rag_qa_musique.py"
+      ],
+      "modelo": "El LLM de QA. Si no hay plantilla rag_qa_<dataset>, usa musique.",
+      "idioma": "ingles",
+      "traducir": [
+        "As an advanced reading comprehension assistant, your task is to analyze text passages and corresponding questions meticulously.",
+        "Your response start after \"Thought: \", where you will methodically break down the reasoning process, illustrating how you arrive at conclusions.",
+        "Conclude with \"Answer: \" to present a concise, definitive response, devoid of additional elaborations.",
+        "El ejemplo: pasajes de Wikipedia en inglés y la pregunta When was Neville A. Stanton's employer founded?"
+      ],
+      "etiquetas_que_escribe_el_codigo": [
+        "Wikipedia Title:",
+        "Question:",
+        "Thought:"
+      ],
+      "no_traducir_sin_cambiar_codigo": [
+        "Answer: HippoRAG.qa parte la respuesta con split('Answer:'). Si la etiqueta cambia, hay que cambiar esa línea.",
+        "Thought: el sistema y el armado del mensaje la usan como inicio del razonamiento.",
+        "Wikipedia Title: está escrita en HippoRAG.py, no solo en la plantilla."
+      ]
+    }
+  ],
+  "no_tienen_idioma": [
+    {"nombre": "Preprocesador", "archivo": "preprocessing.py", "por_que": "Un documento entra como un chunk. No hay prompt."},
+    {"nombre": "text_processing", "archivo": "utils/misc_utils.py", "por_que": "Pasa a minúsculas y conserva letras Unicode. No traduce."},
+    {"nombre": "Grafo", "archivo": "HippoRAG.py add_fact_edges, add_passage_edges, augment_graph", "por_que": "Nodos, pesos y edge_kind. No hay texto de instrucción."},
+    {"nombre": "Sinonimia", "archivo": "HippoRAG.py add_synonymy_edges", "por_que": "KNN, umbral 0,8 y tope de 100. Compara vectores, no frases en inglés."},
+    {"nombre": "PageRank", "archivo": "HippoRAG.py run_ppr", "por_que": "python-igraph, directed=False, damping 0,5."},
+    {"nombre": "Emparejador del filtro", "archivo": "rerank.py difflib", "por_que": "Elige el candidato más parecido. No es un prompt."}
+  ]
+}
