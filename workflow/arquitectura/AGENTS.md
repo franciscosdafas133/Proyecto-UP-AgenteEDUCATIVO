@@ -52,6 +52,7 @@ cronograma.md   ── plan de 7 días: qué se hace cada día y su puerta de sa
 | ¿Cómo se prepara y entra el material? | `antecedentes.md` §3 y `requisitos.md` (REQ-02, REQ-03) |
 | ¿Qué debe cumplir el recuperador? | `requisitos.md` |
 | ¿Cómo funciona el método, paso a paso? | `sistema.md` |
+| ¿Cuál es el flujo completo, en orden, para una persona o para un LLM? | `hipporag2-proceso.json` (canónico), `hipporag2-proceso.mmd` y la imagen `hipporag2-proceso.png` |
 | ¿Cómo se rastrea un resultado hasta su fuente? | `sistema.md` → Trazabilidad |
 | ¿Dónde puede aparecer una alucinación? | `sistema.md` → Dónde puede aparecer una alucinación |
 | ¿Cómo sé que un requisito se cumple? | `verificacion.md` |

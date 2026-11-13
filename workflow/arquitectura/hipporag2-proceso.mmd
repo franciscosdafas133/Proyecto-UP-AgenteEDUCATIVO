@@ -1,0 +1,41 @@
+%% Proceso de HippoRAG 2. La especificación canónica es hipporag2-proceso.json.
+%% Fuente: Gutiérrez et al., ICML 2025, arXiv:2502.14802, §3, §4.4, §6.2, Apéndices A, B y G.1.
+flowchart TD
+  classDef llm fill:#E7F0FA,stroke:#1D4E89,color:#1C1917
+  classDef enc fill:#E5F6F0,stroke:#0F6E56,color:#1C1917
+  classDef hip fill:#F3EEF9,stroke:#5B3A8C,color:#1C1917
+  classDef io fill:#F5F5F4,stroke:#44403C,color:#1C1917
+  classDef dec fill:#FFF7ED,stroke:#9A3412,color:#1C1917
+
+  subgraph OFF["Indexación offline — una vez"]
+    direction TB
+    P["Pasajes del corpus"]:::io
+    NER["LLM: NER del pasaje"]:::llm
+    OIE["LLM: OpenIE, triples sin esquema"]:::llm
+    FR["Grafo: nodos de frase y arista de relación"]:::hip
+    SIN["Encoder: arista de sinonimia si similitud > 0.8"]:::enc
+    PN["Grafo: nodo de pasaje y arista contains"]:::hip
+    EMB["Encoder: embeddings de triples y de pasajes"]:::enc
+    LISTO["Índice listo: grafo + embeddings"]:::hip
+    P --> NER --> OIE --> FR --> SIN --> PN --> EMB --> LISTO
+  end
+
+  subgraph ON["Recuperación online — cada consulta"]
+    direction TB
+    Q["Consulta, sin extraer entidades"]:::io
+    VIN["Encoder: top-5 triples y similitud de todos los pasajes"]:::enc
+    FIL["LLM: filtro, como máximo 4 triples de la lista"]:::llm
+    VACIO{"¿El filtro dejó algún triple?"}:::dec
+    DEN["Encoder: pasajes por similitud, sin PPR"]:::enc
+    SEM["Semillas: hasta 5 frases, y todos los pasajes x 0.05"]:::hip
+    PPR["PPR, amortiguación 0.5"]:::hip
+    TOP["5 pasajes"]:::hip
+    QA["LLM: lee los 5 pasajes y responde"]:::llm
+    R["Respuesta"]:::io
+    Q --> VIN --> FIL --> VACIO
+    VACIO -->|no| DEN --> TOP
+    VACIO -->|sí| SEM --> PPR --> TOP
+    TOP --> QA --> R
+  end
+
+  LISTO -->|llega una consulta| Q

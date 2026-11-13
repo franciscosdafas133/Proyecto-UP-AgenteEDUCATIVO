@@ -1,0 +1,326 @@
+{
+  "esquema": "hipporag2-proceso/1",
+  "id": "hipporag2-proceso-conocimiento",
+  "titulo": "Proceso de conocimiento de HippoRAG 2",
+  "idioma": "es",
+  "instrucciones_para_llm": [
+    "Este archivo es la especificación del proceso. Recórrelo; no lo resumas de memoria.",
+    "Hay dos fases. Primero completa indexacion_offline. Después, por cada consulta, recorre recuperacion_online usando el grafo ya construido.",
+    "Empieza en el nodo cuyo id está en inicio de la fase. Avanza solo por las aristas de esa fase.",
+    "Si una arista tiene cuando, tómalo solo si la condición se cumple. Si no se cumple, no la cruces.",
+    "Un nodo con repeticion por_cada_pasaje se ejecuta una vez por pasaje antes de pasar a los nodos una_vez_sobre_el_grafo.",
+    "No agregues pasos, hiperparámetros ni salidas que no estén escritos aquí.",
+    "La consulta no pasa por NER. En HippoRAG 2 el enlace por defecto es query-to-triple, no el NER-to-node de HippoRAG 1.",
+    "El filtro solo puede devolver triples que ya estaban en la lista. Si devuelve la lista vacía, no hay PPR."
+  ],
+  "fuente": {
+    "paper": "Gutiérrez, Bernal Jiménez; Shu, Yiheng; Qi, Weijian; Zhou, Sizhe; Su, Yu. From RAG to Memory: Non-Parametric Continual Learning for Large Language Models. ICML 2025. arXiv:2502.14802v2.",
+    "archivo_local": "01_HippoRAG2_ICML2025.pdf",
+    "secciones": ["§3", "§3.1", "§3.2", "§3.3", "§3.4", "§3.5", "§4.4", "§6.2", "Figura 2", "Figura 4", "Figura 5", "Apéndice A", "Apéndice B", "Apéndice G.1", "Tabla 13"],
+    "codigo_oficial": "https://github.com/OSU-NLP-Group/HippoRAG commit d5c8329",
+    "nota_de_alcance": "Describe el método del paper. No incluye las adaptaciones al español (AD-1, AD-2, AD-3), que siguen sin aprobar."
+  },
+  "actores": [
+    {
+      "id": "llm",
+      "papel_en_el_paper": "neocorteza artificial",
+      "hace": ["NER del pasaje", "OpenIE", "filtro de triples", "lectura QA"],
+      "modelo_en_el_paper": "Llama-3.3-70B-Instruct para extracción y filtro; el mismo modelo o GPT-4o-mini para la lectura QA",
+      "fuente": "§3.1, §4.4"
+    },
+    {
+      "id": "encoder",
+      "papel_en_el_paper": "región parahipocampal",
+      "hace": ["embeddings", "similitud entre frases", "query-to-triple", "similitud consulta-pasaje"],
+      "modelo_en_el_paper": "nvidia/NV-Embed-v2",
+      "fuente": "§3.1, §4.4"
+    },
+    {
+      "id": "hipocampo",
+      "papel_en_el_paper": "hipocampo artificial",
+      "hace": ["grafo de conocimiento", "Personalized PageRank"],
+      "fuente": "§3.1, Apéndice G.1"
+    }
+  ],
+  "parametros": [
+    {"id": "linking_top_k", "valor": 5, "significa": "triples que el encoder entrega al filtro", "fuente": "§4.4"},
+    {"id": "filtro_max_hechos", "valor": 4, "significa": "máximo de hechos que el prompt del filtro puede conservar", "fuente": "Figura 4, Apéndice A"},
+    {"id": "frase_semilla_max", "valor": 5, "significa": "máximo de nodos de frase usados como semilla", "fuente": "Apéndice G.1"},
+    {"id": "peso_nodo_pasaje", "valor": 0.05, "significa": "la similitud del pasaje se multiplica por este factor antes de entrar a PPR", "fuente": "§6.2, Apéndice G.1"},
+    {"id": "umbral_sinonimia", "valor": 0.8, "significa": "similitud mínima para crear una arista de sinonimia", "fuente": "Tabla 13"},
+    {"id": "damping_ppr", "valor": 0.5, "significa": "factor de amortiguación de Personalized PageRank", "fuente": "Tabla 13"},
+    {"id": "qa_top_k", "valor": 5, "significa": "pasajes que recibe el LLM de lectura", "fuente": "§4.4"},
+    {"id": "temperatura_llm", "valor": 0.0, "significa": "temperatura fijada para el LLM", "fuente": "Tabla 13"}
+  ],
+  "modelo_del_grafo": {
+    "nodos": [
+      {"tipo": "frase", "es": "sujeto u objeto de un triple", "codificacion": "dispersa: el concepto"},
+      {"tipo": "pasaje", "es": "el pasaje original del corpus", "codificacion": "densa: el contexto"}
+    ],
+    "aristas": [
+      {"tipo": "relacion", "une": "frase con frase", "etiqueta": "la relación del triple"},
+      {"tipo": "sinonimia", "une": "frase con frase", "cuando": "similitud de embeddings mayor que 0.8"},
+      {"tipo": "contexto", "une": "pasaje con frase", "etiqueta": "contains", "cuando": "la frase se extrajo de ese pasaje"}
+    ],
+    "fuente": "§3.1, §3.2, Tabla 13"
+  },
+  "fases": [
+    {
+      "id": "indexacion_offline",
+      "nombre": "Indexación offline",
+      "cuando": "una vez, al construir o ampliar el corpus",
+      "inicio": "idx.pasajes",
+      "fin": "idx.listo"
+    },
+    {
+      "id": "recuperacion_online",
+      "nombre": "Recuperación online y lectura",
+      "cuando": "en cada consulta, con el grafo ya construido",
+      "inicio": "ret.consulta",
+      "fin": "ret.respuesta"
+    }
+  ],
+  "nodos": [
+    {
+      "id": "idx.pasajes",
+      "fase": "indexacion_offline",
+      "actor": "entrada",
+      "titulo": "Pasajes del corpus",
+      "hace": "El corpus es un conjunto de pasajes. Cada pasaje se procesa por separado. El código oficial no parte el documento: indexa el pasaje que recibe.",
+      "repeticion": "por_cada_pasaje",
+      "fuente": ["§3.1", "código oficial, commit d5c8329: el preprocesador convierte cada documento en un solo pasaje"]
+    },
+    {
+      "id": "idx.ner",
+      "fase": "indexacion_offline",
+      "actor": "llm",
+      "titulo": "NER",
+      "hace": "El LLM extrae las entidades del pasaje. Es la primera llamada de la extracción.",
+      "entrada": ["pasaje"],
+      "salida": ["entidades"],
+      "repeticion": "por_cada_pasaje",
+      "fuente": ["§4.4: el LLM de extracción hace NER y OpenIE", "código oficial, commit d5c8329: esta llamada precede a la de triples y le entrega las entidades"]
+    },
+    {
+      "id": "idx.openie",
+      "fase": "indexacion_offline",
+      "actor": "llm",
+      "titulo": "OpenIE",
+      "hace": "El LLM extrae triples (sujeto, relación, objeto) sin esquema fijo. En el código oficial usa el pasaje y las entidades del NER.",
+      "entrada": ["pasaje", "entidades"],
+      "salida": ["triples"],
+      "repeticion": "por_cada_pasaje",
+      "fuente": ["§3.1", "§4.4", "código oficial: prompts/templates/triple_extraction.py"]
+    },
+    {
+      "id": "idx.frases",
+      "fase": "indexacion_offline",
+      "actor": "hipocampo",
+      "titulo": "Nodos de frase y aristas de relación",
+      "hace": "El sujeto y el objeto de cada triple pasan a ser nodos de frase. La relación es una arista de relación entre ellos. El grafo no tiene esquema.",
+      "entrada": ["triples"],
+      "salida": ["nodos_de_frase", "aristas_de_relacion"],
+      "repeticion": "por_cada_pasaje",
+      "fuente": ["§3.1"]
+    },
+    {
+      "id": "idx.sinonimos",
+      "fase": "indexacion_offline",
+      "actor": "encoder",
+      "titulo": "Sinonimia",
+      "hace": "El encoder embebe las frases y compara pares dentro del grafo. Si la similitud pasa de 0.8, agrega una arista de sinonimia. Así se unen frases equivalentes de pasajes distintos.",
+      "entrada": ["nodos_de_frase"],
+      "salida": ["aristas_de_sinonimia"],
+      "repeticion": "una_vez_sobre_el_grafo",
+      "fuente": ["§3.1", "Tabla 13"]
+    },
+    {
+      "id": "idx.pasaje_nodo",
+      "fase": "indexacion_offline",
+      "actor": "hipocampo",
+      "titulo": "Nodos de pasaje y arista de contexto",
+      "hace": "Cada pasaje entra al grafo como nodo de pasaje. Una arista de contexto etiquetada contains lo une con todas las frases que salieron de él.",
+      "entrada": ["pasaje", "nodos_de_frase"],
+      "salida": ["nodos_de_pasaje", "aristas_de_contexto"],
+      "repeticion": "una_vez_sobre_el_grafo",
+      "fuente": ["§3.2"]
+    },
+    {
+      "id": "idx.embeddings",
+      "fase": "indexacion_offline",
+      "actor": "encoder",
+      "titulo": "Embeddings de triples y de pasajes",
+      "hace": "El encoder guarda embeddings normalizados de los triples y de los pasajes. La recuperación online compara la consulta contra esos vectores. Las frases ya quedaron embebidas al detectar sinónimos.",
+      "entrada": ["triples", "pasajes"],
+      "salida": ["embeddings_de_triples", "embeddings_de_pasajes"],
+      "repeticion": "una_vez_sobre_el_grafo",
+      "fuente": ["§3.2", "§3.3", "Apéndice G.1"]
+    },
+    {
+      "id": "idx.listo",
+      "fase": "indexacion_offline",
+      "actor": "hipocampo",
+      "titulo": "Índice listo",
+      "hace": "Quedan el grafo abierto (frases, pasajes, relación, sinonimia y contexto) y los embeddings. Cada consulta usa este índice.",
+      "salida": ["grafo", "embeddings"],
+      "repeticion": "una_vez_sobre_el_grafo",
+      "fuente": ["Figura 2", "§3.1"]
+    },
+    {
+      "id": "ret.consulta",
+      "fase": "recuperacion_online",
+      "actor": "entrada",
+      "titulo": "Consulta",
+      "hace": "Entra la pregunta completa. No se le extraen entidades: el método la compara tal cual con los triples.",
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.3", "§3.5"]
+    },
+    {
+      "id": "ret.vincular",
+      "fase": "recuperacion_online",
+      "actor": "encoder",
+      "titulo": "Vincular la consulta",
+      "hace": "El encoder puntúa dos cosas a la vez. Contra los triples: se queda con los 5 más parecidos (query-to-triple). Contra los pasajes: calcula la similitud con todos los nodos de pasaje y la guarda.",
+      "entrada": ["consulta", "embeddings_de_triples", "embeddings_de_pasajes"],
+      "salida": ["triples_top5", "similitud_de_pasajes"],
+      "repeticion": "por_cada_consulta",
+      "fuente": ["Figura 2", "§3.3", "§4.4", "Apéndice G.1"]
+    },
+    {
+      "id": "ret.filtro",
+      "fase": "recuperacion_online",
+      "actor": "llm",
+      "titulo": "Memoria de reconocimiento",
+      "hace": "El LLM filtra los 5 triples. Puede dejar como máximo 4, y solo si están en la lista: no inventa hechos. La salida es un subconjunto, o la lista vacía. El prompt de esta llamada fue afinado con DSPy MIPROv2.",
+      "entrada": ["consulta", "triples_top5"],
+      "salida": ["triples_filtrados"],
+      "contrato_de_salida": {"forma": "{\"fact\": [[sujeto, relacion, objeto], ...]}", "si_nada_sirve": "{\"fact\": []}"},
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.4", "§4.4", "Figura 4", "Apéndice A"]
+    },
+    {
+      "id": "ret.vacio",
+      "fase": "recuperacion_online",
+      "actor": "encoder",
+      "titulo": "Sin triples: solo embeddings",
+      "hace": "Si el filtro no dejó ningún triple, no hay semilla de frase y no se recorre el grafo. Se devuelven los pasajes ya ordenados por similitud de embedding.",
+      "entrada": ["similitud_de_pasajes"],
+      "salida": ["pasajes_ordenados"],
+      "cuando": "triples_filtrados está vacío",
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.5", "Apéndice G.1"]
+    },
+    {
+      "id": "ret.semillas",
+      "fase": "recuperacion_online",
+      "actor": "hipocampo",
+      "titulo": "Semillas y probabilidad de reinicio",
+      "hace": "Frases: como máximo 5 nodos de frase que aparezcan en los triples filtrados. El puntaje de cada una es el promedio de los triples filtrados en los que aparece. Pasajes: entran todos los nodos de pasaje. Su puntaje es la similitud de embedding multiplicada por 0.05. Esos puntajes son la probabilidad de reinicio de PPR.",
+      "entrada": ["triples_filtrados", "similitud_de_pasajes"],
+      "salida": ["semillas_de_frase", "semillas_de_pasaje", "probabilidad_de_reinicio"],
+      "cuando": "triples_filtrados tiene al menos un triple",
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.5", "§6.2", "Apéndice G.1"]
+    },
+    {
+      "id": "ret.ppr",
+      "fase": "recuperacion_online",
+      "actor": "hipocampo",
+      "titulo": "Personalized PageRank",
+      "hace": "Se recorre el grafo con PPR. El factor de amortiguación es 0.5. El caminante se redistribuye hacia las semillas y su vecindario. Al terminar, los nodos de pasaje quedan ordenados por su puntaje de PageRank. El paper ejecuta este paso con python-igraph.",
+      "entrada": ["grafo", "probabilidad_de_reinicio"],
+      "salida": ["pasajes_ordenados"],
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.5", "Apéndice G.1", "Tabla 13"]
+    },
+    {
+      "id": "ret.top5",
+      "fase": "recuperacion_online",
+      "actor": "hipocampo",
+      "titulo": "Cinco pasajes",
+      "hace": "De la lista ordenada, por embeddings o por PageRank, se toman los 5 primeros. Esos pasajes son el contexto de la lectura.",
+      "entrada": ["pasajes_ordenados"],
+      "salida": ["pasajes_top5"],
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§4.4", "Figura 2"]
+    },
+    {
+      "id": "ret.qa",
+      "fase": "recuperacion_online",
+      "actor": "llm",
+      "titulo": "Lectura QA",
+      "hace": "El LLM lee la consulta junto con los 5 pasajes y escribe la respuesta.",
+      "entrada": ["consulta", "pasajes_top5"],
+      "salida": ["respuesta"],
+      "repeticion": "por_cada_consulta",
+      "fuente": ["§3.5", "§4.4", "Figura 2"]
+    },
+    {
+      "id": "ret.respuesta",
+      "fase": "recuperacion_online",
+      "actor": "salida",
+      "titulo": "Respuesta",
+      "hace": "Termina la consulta. El índice no se modifica.",
+      "entrada": ["respuesta"],
+      "repeticion": "por_cada_consulta",
+      "fuente": ["Figura 2"]
+    }
+  ],
+  "aristas": [
+    {"de": "idx.pasajes", "a": "idx.ner"},
+    {"de": "idx.ner", "a": "idx.openie"},
+    {"de": "idx.openie", "a": "idx.frases"},
+    {"de": "idx.frases", "a": "idx.sinonimos", "cuando": "ya se procesaron todos los pasajes"},
+    {"de": "idx.sinonimos", "a": "idx.pasaje_nodo"},
+    {"de": "idx.pasaje_nodo", "a": "idx.embeddings"},
+    {"de": "idx.embeddings", "a": "idx.listo"},
+    {"de": "idx.listo", "a": "ret.consulta", "cuando": "llega una consulta"},
+    {"de": "ret.consulta", "a": "ret.vincular"},
+    {"de": "ret.vincular", "a": "ret.filtro"},
+    {"de": "ret.filtro", "a": "ret.vacio", "cuando": "triples_filtrados está vacío"},
+    {"de": "ret.filtro", "a": "ret.semillas", "cuando": "triples_filtrados tiene al menos un triple"},
+    {"de": "ret.semillas", "a": "ret.ppr"},
+    {"de": "ret.vacio", "a": "ret.top5"},
+    {"de": "ret.ppr", "a": "ret.top5"},
+    {"de": "ret.top5", "a": "ret.qa"},
+    {"de": "ret.qa", "a": "ret.respuesta"}
+  ],
+  "llamadas_llm": [
+    {"orden": 1, "nodo": "idx.ner", "cuando": "Al indexar, una vez por pasaje. Es la primera llamada sobre ese pasaje."},
+    {"orden": 2, "nodo": "idx.openie", "cuando": "Al indexar, una vez por pasaje, después del NER. Recibe las entidades."},
+    {"orden": 3, "nodo": "ret.filtro", "cuando": "En cada consulta, después de elegir los 5 triples. No ocurre durante la indexación."},
+    {"orden": 4, "nodo": "ret.qa", "cuando": "En cada consulta, al final, con los 5 pasajes ya elegidos."}
+  ],
+  "ejemplo": {
+    "id": "figura-5-erik-hort",
+    "fuente": "Apéndice B, Figura 5",
+    "consulta": "What county is Erik Hort's birthplace a part of?",
+    "triples_top5": [
+      ["Erik Hort", "born in", "Montebello"],
+      ["Erik Hort", "born in", "New York"],
+      ["Erik Hort", "is a", "American"],
+      ["Erik Hort", "born on", "February 16, 1987"],
+      ["Erik Hort", "is a", "Soccer player"]
+    ],
+    "triples_filtrados": [
+      ["Erik Hort", "born in", "Montebello"],
+      ["Erik Hort", "born in", "New York"]
+    ],
+    "semillas_de_frase": [
+      {"frase": "Montebello", "puntaje": 1.0},
+      {"frase": "Erik Hort", "puntaje": 0.995},
+      {"frase": "New York", "puntaje": 0.989}
+    ],
+    "semillas_de_pasaje": [
+      {"titulo": "Erik Hort", "puntaje": 0.05},
+      {"titulo": "Horton Park (Saint Paul, Minnesota)", "puntaje": 0.031},
+      {"titulo": "Hertfordshire", "puntaje": 0.028}
+    ],
+    "nota": "El 0.05 del primer pasaje es la similitud de ese pasaje multiplicada por el peso 0.05. La figura no publica el orden final de PageRank de este ejemplo."
+  },
+  "representaciones": {
+    "canonica": "hipporag2-proceso.json",
+    "mermaid": "hipporag2-proceso.mmd",
+    "imagen": "hipporag2-proceso.png"
+  }
+}
